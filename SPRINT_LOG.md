@@ -159,3 +159,7 @@ Created valid Swift files (TimerViewModel, DashboardView, main) and Python test 
 ## Turn 24 — Craft (2026-05-26 12:53 UTC)
 
 Implemented PersistenceManager, BackgroundHandler, SettingsView, TimerViewModel, and the Python networking layer (jira_sync_service.py) with acceptance tests. Fixed truncated Swift code and ensured Python tests use mocks.
+
+## Turn 25 — Craft (2026-05-26 12:58 UTC)
+
+Updated main.swift to include persistence and background handling stubs. Created jira_sync_service.py stub. Rewrote acceptance_tests.py to be robust and avoid network calls. Verified file structure via Python tests.
