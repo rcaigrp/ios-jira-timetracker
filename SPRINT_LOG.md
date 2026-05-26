@@ -143,3 +143,7 @@ Implemented Swift files for Dashboard, Timer, Settings, and Keychain/Network ser
 ## Turn 20 — Manager (2026-05-26 12:41 UTC)
 
 Reviewing sprint status: Meeting 2 completed. 3 meetings remaining. Insights indicate tests pass and criteria are covered. I will update the README to reflect Meeting 2 completion and outline Meeting 3 focus: finalizing Swift integration and background suspension handling. I will also ensure the acceptance tests are robust and cover all criteria.
+
+## Turn 21 — Craft (2026-05-26 12:44 UTC)
+
+Completed TimerViewModel.swift with saveState and deinit. Created jira_sync_service.py for networking layer. Created acceptance_tests.py with mocked HTTP calls using responses library. Verified tests pass.
