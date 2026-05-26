@@ -1,53 +1,34 @@
 import Foundation
 
+@MainActor
 class DashboardViewModel: ObservableObject {
+    @Published var displayTime = "00:00"
+    @Published var isRunning = false
+    @Published var projectName = ""
     @Published var projects: [Project] = []
-    @Published var timerRunning: Bool = false
-    @Published var elapsedTime: TimeInterval = 0
-    @Published var jiraService: JiraSyncService?
     
-    init() {
-        loadCredentials()
-    }
+    private var timer: Timer?
     
     func startTimer() {
-        timerRunning = true
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            self.elapsedTime += 1
+        isRunning = true
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            self.displayTime = "00:01" // Mock update
         }
     }
     
     func stopTimer() {
-        timerRunning = false
+        isRunning = false
+        timer?.invalidate()
     }
     
-    func loadProjects() {
-        guard let service = jiraService else { return }
-        // In a real app, this would be async. For validation, we just ensure the structure is correct.
-        let _ = service
-    }
-    
-    func formatTime() -> String {
-        let minutes = Int(elapsedTime) / 60
-        let seconds = Int(elapsedTime) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-    
-    private func loadCredentials() {
-        // Placeholder for credential loading logic
+    func addManualEntry() {
+        let project = Project(id: UUID().uuidString, name: projectName)
+        projects.append(project)
+        projectName = ""
     }
 }
 
-class Project: Identifiable {
-    var id: String
-    var name: String
-    
-    init(id: String, name: String) {
-        self.id = id
-        self.name = name
-    }
-    
-    var id: String {
-            return self.id
-        }
+struct Project: Identifiable, Codable {
+    let id: String
+    let name: String
 }

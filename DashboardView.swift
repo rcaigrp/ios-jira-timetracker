@@ -4,45 +4,40 @@ struct DashboardView: View {
     @StateObject var viewModel: DashboardViewModel
     
     var body: some View {
-        VStack {
-            Text("LocalTrack Dashboard")
-                .font(.largeTitle)
-            
-            TimerDisplayView(viewModel: viewModel)
-            
-            ProjectListView(viewModel: viewModel)
-        }
-        .onAppear {
-            viewModel.loadProjects()
-        }
-    }
-}
-
-struct TimerDisplayView: View {
-    @ObservedObject var viewModel: DashboardViewModel
-    
-    var body: some View {
-        VStack {
-            Text(viewModel.formatTime())
-                .font(.system(.title, .monospaced))
-            HStack {
-                Button(action: viewModel.startTimer) {
-                    Text("Start")
+        NavigationView {
+            List {
+                Section(header: Text("Timer")) {
+                    Text(viewModel.displayTime)
+                    if viewModel.isRunning {
+                        Button("Stop") {
+                            viewModel.stopTimer()
+                        }
+                    } else {
+                        Button("Start") {
+                            viewModel.startTimer()
+                        }
+                    }
                 }
-                Button(action: viewModel.stopTimer) {
-                    Text("Stop")
+                Section(header: Text("Manual Entry")) {
+                    TextField("Project Name", text: $viewModel.projectName)
+                    Button("Add Manual Entry") {
+                        viewModel.addManualEntry()
+                    }
+                }
+                Section(header: Text("Projects")) {
+                    ForEach(viewModel.projects, id: \.id) { project in
+                        Text(project.name)
+                    }
                 }
             }
-        }
-    }
-}
-
-struct ProjectListView: View {
-    @ObservedObject var viewModel: DashboardViewModel
-    
-    var body: some View {
-        List(viewModel.projects) {
-            Text($0.name)
+            .navigationTitle("LocalTrack")
+            .toolbar {
+                ToolbarItem {
+                    NavigationLink("Settings") {
+                        SettingsView()
+                    }
+                }
+            }
         }
     }
 }
