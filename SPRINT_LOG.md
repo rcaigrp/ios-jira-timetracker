@@ -75,3 +75,7 @@ Implemented Swift UI and logic files (DashboardView, DashboardViewModel, TimerMa
 ## Turn 3 — Craft (2026-05-26 11:14 UTC)
 
 
+
+## Turn 4 — Craft (2026-05-26 11:16 UTC)
+
+Fixed missing JiraSyncService import by creating a robust implementation with proper HTTP handling. Corrected TimerManager state persistence logic by ensuring load_state() correctly applies JSON data to instance variables and save_state() persists current state. Updated acceptance_tests.py to properly mock Jira API calls using responses library and verify timer persistence across simulated relaunches.

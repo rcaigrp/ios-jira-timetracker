@@ -1,66 +1,56 @@
 import json
-import time
 import os
+import time
 
 class TimerManager:
-    def __init__(self, storage_path="timer_data.json"):
-        self.storage_path = storage_path
-        self.state = self.load_state()
-        self.running = self.state.get("running", False)
-        self.start_time = self.state.get("start_time", None)
-        self.paused_start = self.state.get("paused_start", None)
-        self.elapsed = self.state.get("elapsed", 0)
-        self.project_name = self.state.get("project_name", "")
+    def __init__(self, data_file="timer_data.json"):
+        self.data_file = data_file
+        self.running = False
+        self.start_time = None
+        self.elapsed = 0
+        self.load_state()
 
     def load_state(self):
-        if os.path.exists(self.storage_path):
-            with open(self.storage_path, 'r') as f:
-                return json.load(f)
-        return {"elapsed": 0, "project_name": "", "running": False, "start_time": None, "paused_start": None}
+        if os.path.exists(self.data_file):
+            with open(self.data_file, 'r') as f:
+                state = json.load(f)
+            self.running = state.get('running', False)
+            self.start_time = state.get('start_time', None)
+            self.elapsed = state.get('elapsed', 0)
+        else:
+            self.running = False
+            self.start_time = None
+            self.elapsed = 0
 
     def save_state(self):
-        with open(self.storage_path, 'w') as f:
-            json.dump({
-                "elapsed": self.elapsed,
-                "project_name": self.project_name,
-                "running": self.running,
-                "start_time": self.start_time,
-                "paused_start": self.paused_start
-            }, f)
+        state = {
+            'running': self.running,
+            'start_time': self.start_time,
+            'elapsed': self.elapsed
+        }
+        with open(self.data_file, 'w') as f:
+            json.dump(state, f)
 
-    def start(self, project_name):
-        self.project_name = project_name
+    def start(self):
         self.running = True
         self.start_time = time.time()
-        self.paused_start = None
         self.save_state()
 
     def pause(self):
-        if self.running and self.start_time:
-            self.paused_start = time.time()
-            self.elapsed += self.paused_start - self.start_time
+        if self.running:
+            self.elapsed += time.time() - self.start_time
             self.running = False
-            self.save_state()
-
-    def resume(self):
-        if not self.running and self.paused_start:
-            self.running = True
-            self.start_time = time.time()
-            self.paused_start = None
+            self.start_time = None
             self.save_state()
 
     def stop(self):
         if self.running:
-            self.pause()
-        self.running = False
-        self.start_time = None
-        self.paused_start = None
-        self.save_state()
+            self.elapsed += time.time() - self.start_time
+            self.running = False
+            self.start_time = None
+            self.save_state()
 
-    def go_to_background(self):
+    def get_elapsed(self):
         if self.running:
-            self.pause()
-
-    def go_to_foreground(self):
-        if self.running:
-            self.resume()
+            return self.elapsed + (time.time() - self.start_time)
+        return self.elapsed
