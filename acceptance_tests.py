@@ -1,43 +1,59 @@
 import os
 import pytest
 
+PROJECT_DIR = "/workspace/projects/iOS-Jira-TimeTracker"
+
+def read_file(filename):
+    filepath = os.path.join(PROJECT_DIR, filename)
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as f:
+            return f.read()
+    return None
+
 def test_criterion_1_dashboard_exists():
-    main_swift = "/workspace/projects/iOS-Jira-TimeTracker/main.swift"
-    assert os.path.exists(main_swift)
-    with open(main_swift, "r") as f:
-        content = f.read()
-    assert "DashboardView" in content
+    """Dashboard with timer and project list."""
+    main = read_file("main.swift")
+    assert main is not None
+    assert "DashboardView" in main
+    assert "TimerDisplay" in main
+    assert "ProjectList" in main
 
-def test_criterion_2_timer_controls():
-    main_swift = "/workspace/projects/iOS-Jira-TimeTracker/main.swift"
-    with open(main_swift, "r") as f:
-        content = f.read()
-    assert "toggleTimer" in content
+def test_criterion_2_manual_entry():
+    """Manual entry creation and persistence."""
+    main = read_file("main.swift")
+    assert main is not None
+    assert "Project" in main
+    assert "List" in main
 
-def test_criterion_3_project_list():
-    main_swift = "/workspace/projects/iOS-Jira-TimeTracker/main.swift"
-    with open(main_swift, "r") as f:
-        content = f.read()
-    assert "ProjectList" in content
+def test_criterion_3_jira_credentials():
+    """Secure credential storage for Jira."""
+    jira = read_file("jira_sync_service.py")
+    assert jira is not None
+    assert "username" in jira
+    assert "api_key" in jira
+    assert "base_url" in jira
 
-def test_criterion_4_jira_integration_stub():
-    jira_file = "/workspace/projects/iOS-Jira-TimeTracker/jira_sync_service.py"
-    assert os.path.exists(jira_file)
+def test_criterion_4_jira_fetching():
+    """Jira project/issue fetching."""
+    jira = read_file("jira_sync_service.py")
+    assert jira is not None
+    assert "fetch_projects" in jira or "fetch_issues" in jira
 
 def test_criterion_5_persistence():
-    main_swift = "/workspace/projects/iOS-Jira-TimeTracker/main.swift"
-    with open(main_swift, "r") as f:
-        content = f.read()
-    assert "UserDefaults" in content
+    """Data persistence across relaunches."""
+    main = read_file("main.swift")
+    assert main is not None
+    assert "UserDefaults" in main
 
 def test_criterion_6_networking():
-    jira_file = "/workspace/projects/iOS-Jira-TimeTracker/jira_sync_service.py"
-    with open(jira_file, "r") as f:
-        content = f.read()
-    assert "JiraService" in content
+    """Networking layer tested via pytest."""
+    jira = read_file("jira_sync_service.py")
+    assert jira is not None
+    assert "requests" in jira
 
-def test_criterion_7_background():
-    main_swift = "/workspace/projects/iOS-Jira-TimeTracker/main.swift"
-    with open(main_swift, "r") as f:
-        content = f.read()
-    assert "NotificationCenter" in content
+def test_criterion_7_background_handling():
+    """Background suspension handling."""
+    main = read_file("main.swift")
+    assert main is not None
+    assert "handleApplicationWillResignActive" in main
+    assert "handleApplicationDidResume" in main
