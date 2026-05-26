@@ -71,3 +71,7 @@ Created validate_swift.py to fix the Python validation script syntax, checking D
 ## Turn 2 — Craft (2026-05-26 11:07 UTC)
 
 Implemented Swift UI and logic files (DashboardView, DashboardViewModel, TimerManager, SettingsView, SettingsViewModel) and Python backend files (jira_sync_service.py, acceptance_tests.py). Fixed struct/class definitions in Swift files to pass validation. Added responses mocking for Jira API tests. Prepared docker command to validate and run tests.
+
+## Turn 3 — Craft (2026-05-26 11:14 UTC)
+
+
