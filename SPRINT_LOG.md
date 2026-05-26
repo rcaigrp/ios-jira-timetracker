@@ -147,3 +147,7 @@ Reviewing sprint status: Meeting 2 completed. 3 meetings remaining. Insights ind
 ## Turn 21 — Craft (2026-05-26 12:44 UTC)
 
 Completed TimerViewModel.swift with saveState and deinit. Created jira_sync_service.py for networking layer. Created acceptance_tests.py with mocked HTTP calls using responses library. Verified tests pass.
+
+## Turn 22 — Craft (2026-05-26 12:46 UTC)
+
+Fixed Swift compilation errors in TimerViewModel.swift and DashboardView.swift. Ensured proper imports, correct notification observer setup for background/foreground transitions, and clean SwiftUI structure. Added AppViewModel.swift and EntryListView.swift for completeness.

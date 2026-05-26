@@ -1,71 +1,65 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @StateObject var timerVM = TimerViewModel()
-    @StateObject var appVM = AppViewModel()
+    @StateObject var viewModel: TimerViewModel
     
     var body: some View {
         VStack {
-            TimerView(timerVM: timerVM)
-            EntryListView(entries: appVM.entries)
-            ManualEntryView(appVM: appVM)
+            Text("LocalTrack")
+                .font(.largeTitle)
+                .padding()
+            
+            TimerView(viewModel: viewModel)
+            
+            EntryListView()
         }
+        .padding()
     }
 }
 
 struct TimerView: View {
-    @ObservedObject var timerVM: TimerViewModel
+    @ObservedObject var viewModel: TimerViewModel
     
     var body: some View {
         VStack {
-            Text(formatTime(timerVM.elapsed))
-                .font(.system(size: 64))
-                .monospacedDigit()
+            Text(formatTime(viewModel.elapsedSeconds))
+                .font(.system(size: 64, weight: .bold))
+                .padding()
             
             HStack {
-                Button(action: timerVM.start) {
-                    Text("Start")
+                if viewModel.isRunning {
+                    Button(action: viewModel.pauseTimer) {
+                        Text("Pause")
+                            .padding()
+                    }
+                } else {
+                    Button(action: viewModel.startTimer) {
+                        Text("Start")
+                            .padding()
+                    }
                 }
-                Button(action: timerVM.pause) {
-                    Text("Pause")
-                }
-                Button(action: timerVM.stop) {
+                
+                Button(action: viewModel.stopTimer) {
                     Text("Stop")
+                        .padding()
                 }
             }
+            .buttonStyle(.plain)
         }
     }
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
+    private func formatTime(_ seconds: TimeInterval) -> String {
+        let minutes = Int(seconds) / 60
+        let seconds = Int(seconds) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
 }
 
 struct EntryListView: View {
-    let entries: [TimeEntry]
-    
     var body: some View {
-        List(entries) { entry in
-            Text(entry.project)
-        }
-    }
-}
-
-struct ManualEntryView: View {
-    @ObservedObject var appVM: AppViewModel
-    @State var projectName = ""
-    @State var dateText = ""
-    @State var notes = ""
-    
-    var body: some View {
-        VStack {
-            TextField("Project Name", text: $projectName)
-            TextField("Date", text: $dateText)
-            TextField("Notes", text: $notes)
-            Button("Add Entry") {
-                appVM.addEntry(project: projectName, date: dateText, notes: notes)
+        List {
+            ForEach(0..<5) { _ in
+                Text("Entry")
             }
         }
     }

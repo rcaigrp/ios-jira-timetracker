@@ -1,41 +1,36 @@
 import Foundation
 
-struct TimeEntry: Identifiable, Codable {
-    let id: String
-    let project: String
-    let date: String
-    let duration: TimeInterval
-    let notes: String
-}
-
 class AppViewModel: ObservableObject {
-    @Published var entries: [TimeEntry] = []
+    @Published var entries: [Entry] = []
     
     init() {
         loadEntries()
     }
     
-    func addEntry(project: String, date: String, notes: String) {
-        let entry = TimeEntry(
-            id: UUID().uuidString,
-            project: project,
-            date: date,
-            duration: 0,
-            notes: notes
-        )
+    func addEntry(_ entry: Entry) {
         entries.append(entry)
         saveEntries()
     }
     
-    private func loadEntries() {
-        if let data = UserDefaults.standard.data(forKey: "timeEntries"), let entries = try? JSONDecoder().decode([TimeEntry].self, from: data) {
-            self.entries = entries
+    private func saveEntries() {
+        if let data = try? JSONEncoder().encode(entries) {
+            UserDefaults.standard.set(data, forKey: "entries")
         }
     }
     
-    private func saveEntries() {
-        if let data = try? JSONEncoder().encode(entries) {
-            UserDefaults.standard.set(data, forKey: "timeEntries")
+    private func loadEntries() {
+        if let data = UserDefaults.standard.data(forKey: "entries"), let decoded = try? JSONDecoder().decode([Entry].self, from: data) {
+            entries = decoded
         }
     }
+}
+
+struct Entry: Codable, Identifiable {
+    var id: String = UUID().uuidString
+    var project: String
+    var date: String
+    var startTime: String
+    var endTime: String
+    var duration: TimeInterval
+    var notes: String?
 }

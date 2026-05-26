@@ -1,89 +1,96 @@
 import Foundation
-import Combine
+import SwiftUI
 import UIKit
+import Combine
 
 class TimerViewModel: ObservableObject {
-    @Published var elapsed: TimeInterval = 0
     @Published var isRunning: Bool = false
+    @Published var elapsedSeconds: TimeInterval = 0
+    @Published var timerStartDate: Date?
     
     private var timer: Timer?
-    private var startDate: Date?
-    private var backgroundObserver: Any?
-    private var wasRunning: Bool = false
     
     init() {
         loadState()
-        setupBackgroundObserver()
+        setupNotificationObserver()
     }
     
-    private func setupBackgroundObserver() {
-        backgroundObserver = NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: nil) { _ in
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupNotificationObserver() {
+        NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
             if self.isRunning {
-                self.pause()
-                self.wasRunning = true
+                self.pauseTimer()
             }
         }
         
-        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: nil) { _ in
-            if self.wasRunning {
-                self.resume()
-                self.wasRunning = false
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+            if self.timerStartDate != nil {
+                self.resumeTimer()
             }
         }
     }
     
-    func start() {
+    func startTimer() {
+        guard !isRunning else { return }
         isRunning = true
-        startDate = Date()
-        startTimer()
+        timerStartDate = Date()
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            if let start = self.timerStartDate {
+                self.elapsedSeconds = Date().timeIntervalSince(start)
+            }
+        }
     }
     
-    func pause() {
+    func pauseTimer() {
+        guard isRunning else { return }
         isRunning = false
         timer?.invalidate()
         timer = nil
     }
     
-    func resume() {
-        isRunning = true
-        startDate = Date()
-        startTimer()
-    }
-    
-    func stop() {
+    func stopTimer() {
+        guard isRunning else { return }
         isRunning = false
         timer?.invalidate()
         timer = nil
+        timerStartDate = nil
+        elapsedSeconds = 0
         saveState()
     }
     
-    private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            if let startDate = self.startDate {
-                self.elapsed = Date().timeIntervalSince(startDate)
+    private func resumeTimer() {
+        if !isRunning && timerStartDate != nil {
+            isRunning = true
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                guard let self = self else { return }
+                if let start = self.timerStartDate {
+                    self.elapsedSeconds = Date().timeIntervalSince(start)
+                }
             }
-        }
-    }
-    
-    private func loadState() {
-        if let savedDate = UserDefaults.standard.object(forKey: "timerStartDate") as? Date {
-            self.startDate = savedDate
-            self.elapsed = Date().timeIntervalSince(savedDate)
-            self.isRunning = true
         }
     }
     
     private func saveState() {
-        if isRunning {
-            UserDefaults.standard.set(startDate, forKey: "timerStartDate")
+        if let start = timerStartDate {
+            UserDefaults.standard.set(start, forKey: "timerStartDate")
         } else {
-            UserDefaults.standard.removeObject(forKey: "timerStartDate")
+            UserDefaults.standard.set(nil, forKey: "timerStartDate")
         }
+        UserDefaults.standard.set(elapsedSeconds, forKey: "elapsedSeconds")
+        UserDefaults.standard.set(isRunning, forKey: "isRunning")
     }
     
-    deinit {
-        if let observer = backgroundObserver {
-            NotificationCenter.default.removeObserver(observer)
+    private func loadState() {
+        if let start = UserDefaults.standard.date(forKey: "timerStartDate") {
+            timerStartDate = start
+        } else {
+            timerStartDate = nil
         }
+        elapsedSeconds = UserDefaults.standard.double(forKey: "elapsedSeconds")
+        isRunning = UserDefaults.standard.bool(forKey: "isRunning")
     }
 }
