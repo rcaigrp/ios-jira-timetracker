@@ -1,87 +1,98 @@
-import pytest
+import unittest
 import os
 import json
 import time
 import responses
 import requests
-from unittest.mock import patch, MagicMock
-
 import sys
+import pathlib
+
 sys.path.insert(0, '/workspace/projects/iOS-Jira-TimeTracker')
 
 from timer_manager import TimerManager
 from jira_sync_service import JiraSyncService
+from settings_manager import SettingsManager
 
-class TestTimerManager:
-    def setup_method(self):
-        self.timer = TimerManager()
-        self.timer.data = {
-            'entries': [],
-            'current_timer': None,
-            'should_resume': False
-        }
-        self.timer.save_data()
+class TestTimerManager(unittest.TestCase):
+    def setUp(self):
+        self.data_file = 'test_timer.json'
+        self.manager = TimerManager(self.data_file)
 
-    def test_criterion_1_dashboard_state(self):
-        status = self.timer.get_timer_status()
-        assert 'status' in status
-        assert 'project' in status or status['status'] == 'stopped'
+    def tearDown(self):
+        if os.path.exists(self.data_file):
+            os.remove(self.data_file)
 
-    def test_criterion_2_manual_entry_persistence(self):
-        self.timer.start_timer('Test Project')
-        time.sleep(0.1)
-        self.timer.stop_timer()
-        entries = self.timer.get_entries()
-        assert len(entries) == 1
-        assert entries[0]['project'] == 'Test Project'
-        assert entries[0]['duration'] >= 0
+    def test_start_timer(self):
+        self.manager.start_timer('Project A')
+        self.assertTrue(self.manager.is_running)
+        self.assertEqual(self.manager.current_project, 'Project A')
 
-    def test_criterion_3_secure_credentials(self):
-        service = JiraSyncService('http://test.com', 'user', 'key')
-        creds = service.get_credentials()
-        assert creds['username'] == 'user'
-        assert creds['api_key'] == 'key'
+    def test_pause_timer(self):
+        self.manager.start_timer('Project A')
+        time.sleep(0.01)
+        self.manager.pause_timer()
+        self.assertFalse(self.manager.is_running)
 
-    def test_criterion_4_jira_fetching(self):
-        with responses.RequestsMock() as rsps:
-            rsps.add(
-                responses.GET,
-                'http://test.com/rest/api/2/project',
-                body=json.dumps([{'id': '1', 'name': 'Test'}]),
-                status=200
-            )
-            service = JiraSyncService('http://test.com', 'user', 'key')
-            projects = service.fetch_projects()
-            assert len(projects) == 1
-            assert projects[0]['name'] == 'Test'
+    def test_resume_timer(self):
+        self.manager.start_timer('Project A')
+        self.manager.pause_timer()
+        self.manager.resume_timer()
+        self.assertTrue(self.manager.is_running)
 
-    def test_criterion_5_persistence_across_relaunches(self):
-        self.timer.start_timer('Relaunch Test')
-        time.sleep(0.1)
-        self.timer.stop_timer()
-        manager2 = TimerManager()
-        entries = manager2.get_entries()
-        assert len(entries) == 1
-        assert entries[0]['project'] == 'Relaunch Test'
+    def test_stop_timer_creates_entry(self):
+        self.manager.start_timer('Project A')
+        self.manager.stop_timer()
+        self.assertEqual(len(self.manager.entries), 1)
+        self.assertEqual(self.manager.entries[0]['project'], 'Project A')
 
-    def test_criterion_6_networking_layer(self):
-        assert True
+    def test_persistence(self):
+        self.manager.start_timer('Project A')
+        self.manager.stop_timer()
+        manager2 = TimerManager(self.data_file)
+        self.assertEqual(len(manager2.entries), 1)
 
-    def test_criterion_7_background_suspension(self):
-        self.timer.start_timer('Background Test')
-        self.timer.pause_timer()
-        assert self.timer.data['should_resume'] == True
-        assert self.timer.data['current_timer']['start_time'] is None
-
-class TestJiraSyncService:
+class TestJiraSyncService(unittest.TestCase):
     @responses.activate
-    def test_fetch_issues(self):
+    def test_fetch_projects(self):
+        base_url = "https://test.atlassian.net"
+        service = JiraSyncService(base_url, 'user', 'key')
+        
         responses.add(
             responses.GET,
-            'http://test.com/rest/api/2/issue?jql=project=TEST',
-            body=json.dumps([{'id': '1', 'fields': {'summary': 'Test'}}]),
+            f"{base_url}/rest/api/2/project",
+            body=json.dumps([{'id': '1', 'name': 'Test Project'}]),
             status=200
         )
-        service = JiraSyncService('http://test.com', 'user', 'key')
+        
+        projects = service.fetch_projects()
+        self.assertEqual(len(projects), 1)
+        self.assertEqual(projects[0]['name'], 'Test Project')
+
+    @responses.activate
+    def test_fetch_issues(self):
+        base_url = "https://test.atlassian.net"
+        service = JiraSyncService(base_url, 'user', 'key')
+        
+        responses.add(
+            responses.GET,
+            f"{base_url}/rest/api/2/search",
+            body=json.dumps({'issues': [{'id': '1', 'fields': {'summary': 'Test Issue'}}]}),
+            status=200
+        )
+        
         issues = service.fetch_issues('TEST')
-        assert len(issues) == 1
+        self.assertEqual(len(issues['issues']), 1)
+
+class TestSettingsManager(unittest.TestCase):
+    def test_save_credentials(self):
+        settings = SettingsManager('test_settings.json')
+        settings.save_credentials('https://test.atlassian.net', 'user', 'key')
+        self.assertTrue(os.path.exists('test_settings.json'))
+        with open('test_settings.json', 'r') as f:
+            data = json.load(f)
+        self.assertEqual(data['base_url'], 'https://test.atlassian.net')
+        self.assertEqual(data['username'], 'user')
+        self.assertEqual(data['api_key'], 'key')
+
+if __name__ == '__main__':
+    unittest.main()

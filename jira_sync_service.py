@@ -5,27 +5,28 @@ class JiraSyncService:
         self.base_url = base_url
         self.username = username
         self.api_key = api_key
-        self.auth = (username, api_key)
+
+    def _get_headers(self):
+        return {
+            'Authorization': f'Basic {self._encode_credentials()}'
+        }
+
+    def _encode_credentials(self):
+        import base64
+        credentials = f"{self.username}:{self.api_key}"
+        return base64.b64encode(credentials.encode()).decode()
 
     def fetch_projects(self):
         url = f"{self.base_url}/rest/api/2/project"
-        response = requests.get(url, auth=self.auth)
+        response = requests.get(url, headers=self._get_headers())
         response.raise_for_status()
         return response.json()
 
     def fetch_issues(self, project_key):
-        url = f"{self.base_url}/rest/api/2/issue?jql=project={project_key}"
-        response = requests.get(url, auth=self.auth)
+        url = f"{self.base_url}/rest/api/2/search"
+        payload = {
+            'jql': f"project = '{project_key}'"
+        }
+        response = requests.get(url, headers=self._get_headers(), params=payload)
         response.raise_for_status()
         return response.json()
-
-    def save_credentials(self, credentials):
-        self.username = credentials['username']
-        self.api_key = credentials['api_key']
-        self.auth = (self.username, self.api_key)
-
-    def get_credentials(self):
-        return {
-            'username': self.username,
-            'api_key': self.api_key
-        }
