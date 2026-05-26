@@ -10,6 +10,6 @@
     "The application gracefully handles iOS background suspension by pausing the timer and resuming correctly upon foreground return, verifiable by simulating background transitions and inspecting timer delta calculations."
   ],
   "meeting_budget": 5,
-  "meetings_held": 1,
+  "meetings_held": 2,
   "status": "active"
 }

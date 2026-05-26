@@ -1,55 +1,45 @@
-import unittest
+import pytest
 import responses
-import sys
-sys.path.append('/workspace/projects/iOS-Jira-TimeTracker')
-
 from jira_sync_service import JiraSyncService
 
-class TestJiraSyncService(unittest.TestCase):
-    def setUp(self):
-        self.service = JiraSyncService(
-            base_url="https://test.atlassian.net",
-            username="testuser",
-            api_key="testkey"
-        )
-
+class TestJiraSyncService:
     @responses.activate
     def test_fetch_projects(self):
+        base_url = "https://test.jira.com"
+        service = JiraSyncService(base_url, "user", "key")
         responses.add(
             responses.GET,
-            "https://test.atlassian.net/rest/api/3/project",
-            json=[{"id": "10000", "name": "Test Project"}],
+            f"{base_url}/rest/api/2/project",
+            json=[{"id": "1", "name": "TestProject"}],
             status=200
         )
-        projects = self.service.fetch_projects()
+        projects = service.fetch_projects()
         assert len(projects) == 1
-        assert projects[0]['name'] == "Test Project"
+        assert projects[0]["name"] == "TestProject"
 
     @responses.activate
     def test_fetch_issues(self):
+        base_url = "https://test.jira.com"
+        service = JiraSyncService(base_url, "user", "key")
         responses.add(
             responses.GET,
-            "https://test.atlassian.net/rest/api/3/search",
-            json={"issues": [{"id": "1", "fields": {"summary": "Test Issue"}}]},
+            f"{base_url}/rest/api/2/search",
+            json={"issues": [{"id": "100", "fields": {"summary": "Test Issue"}}]},
             status=200
         )
-        issues = self.service.fetch_issues("TEST")
+        issues = service.fetch_issues("TP")
         assert len(issues) == 1
-        assert issues[0]['fields']['summary'] == "Test Issue"
+        assert issues[0]["fields"]["summary"] == "Test Issue"
 
     @responses.activate
-    def test_invalid_credentials(self):
+    def test_fetch_projects_fails_on_error(self):
+        base_url = "https://test.jira.com"
+        service = JiraSyncService(base_url, "user", "key")
         responses.add(
             responses.GET,
-            "https://test.atlassian.net/rest/api/3/project",
+            f"{base_url}/rest/api/2/project",
             json={"error": "Unauthorized"},
             status=401
         )
-        try:
-            self.service.fetch_projects()
-            assert False, "Expected exception"
-        except Exception:
-            pass  # Expected failure
-
-if __name__ == '__main__':
-    unittest.main()
+        with pytest.raises(Exception):
+            service.fetch_projects()

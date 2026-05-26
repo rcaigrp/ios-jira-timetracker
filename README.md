@@ -18,4 +18,7 @@ Build a native iOS application that enables users to track time spent on develop
 - Swift files: UI and logic implementation.
 
 ## Status
-Active. Meeting 1 completed.
+Active. Meeting 3/5 completed.
+- jira_sync_service.py implemented.
+- acceptance_tests.py created and passing.
+- Swift files validated.

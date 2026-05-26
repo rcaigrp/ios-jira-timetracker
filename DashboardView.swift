@@ -5,66 +5,44 @@ struct DashboardView: View {
     
     var body: some View {
         VStack {
-            TimerDisplay(elapsedTime: viewModel.elapsedTime, isRunning: viewModel.timerRunning)
+            Text("LocalTrack Dashboard")
+                .font(.largeTitle)
             
-            TextField("Project Name", text: $viewModel.currentProjectName)
-                .textFieldStyle(.plain)
-                .padding()
+            TimerDisplayView(viewModel: viewModel)
             
-            HStack {
-                if viewModel.timerRunning {
-                    Button(action: viewModel.pauseTimer) {
-                        Text("Pause")
-                            .padding()
-                    }
-                } else {
-                    Button(action: viewModel.startTimer) {
-                        Text("Start")
-                            .padding()
-                    }
-                }
-                
-                Button(action: viewModel.stopTimer) {
-                    Text("Stop")
-                        .padding()
-                }
-            }
-            
-            List(viewModel.projects) { project in
-                HStack {
-                    Text(project.name)
-                    Spacer()
-                    Text("\(formatTime(project.duration))")
-                }
-            }
+            ProjectListView(viewModel: viewModel)
         }
-        .padding()
-    }
-    
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        .onAppear {
+            viewModel.loadProjects()
+        }
     }
 }
 
-struct TimerDisplay: View {
-    let elapsedTime: TimeInterval
-    let isRunning: Bool
+struct TimerDisplayView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     
     var body: some View {
-        Text("\(formatTime(elapsedTime))")
-            .font(.system(size: 48))
-            .fontWeight(.bold)
-            .padding()
-        
-        Text(isRunning ? "Running" : "Stopped")
-            .foregroundColor(isRunning ? .green : .gray)
+        VStack {
+            Text(viewModel.formatTime())
+                .font(.system(.title, .monospaced))
+            HStack {
+                Button(action: viewModel.startTimer) {
+                    Text("Start")
+                }
+                Button(action: viewModel.stopTimer) {
+                    Text("Stop")
+                }
+            }
+        }
     }
+}
+
+struct ProjectListView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+    var body: some View {
+        List(viewModel.projects) {
+            Text($0.name)
+        }
     }
 }

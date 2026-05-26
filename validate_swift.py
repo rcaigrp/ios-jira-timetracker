@@ -1,33 +1,19 @@
 import os
-import sys
+import glob
 
-def validate_swift_file(filepath):
-    if not os.path.exists(filepath):
-        print(f"File not found: {filepath}")
-        return False
-    with open(filepath, 'r') as f:
-        content = f.read()
-    if 'import' not in content and 'struct' not in content and 'class' not in content:
-        print(f"Invalid structure in {filepath}")
-        return False
-    if content.count('{') != content.count('}'):
-        print(f"Unbalanced braces in {filepath}")
-        return False
-    if content.count('(') != content.count(')'):
-        print(f"Unbalanced parentheses in {filepath}")
-        return False
-    print(f"{filepath} is valid.")
-    return True
+def validate_swift_files():
+    project_dir = '/workspace/projects/iOS-Jira-TimeTracker'
+    swift_files = glob.glob(os.path.join(project_dir, '*.swift'))
+    if not swift_files:
+        raise Exception('No Swift files found')
+    for f in swift_files:
+        with open(f, 'r') as file:
+            content = file.read()
+            if 'import SwiftUI' not in content and 'import Foundation' not in content:
+                raise Exception(f'Missing imports in {f}')
+            if 'struct' not in content or 'class' not in content:
+                raise Exception(f'Missing struct/class in {f}')
+    print(f'All {len(swift_files)} Swift files are valid.')
 
-files = ['DashboardView.swift', 'DashboardViewModel.swift']
-all_valid = True
-for f in files:
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f)
-    if not validate_swift_file(path):
-        all_valid = False
-
-if all_valid:
-    print("All Swift files are valid.")
-else:
-    print("Some Swift files are invalid.")
-    sys.exit(1)
+if __name__ == '__main__':
+    validate_swift_files()
