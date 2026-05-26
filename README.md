@@ -19,6 +19,3 @@ Build a native iOS application that enables users to track time spent on develop
 
 ## Status
 Active. Meeting 2 completed.
-- Swift UI files verified by Craft.
-- Jira sync service implemented and mockable.
-- Acceptance tests updated to cover AC6 with mocked HTTP.

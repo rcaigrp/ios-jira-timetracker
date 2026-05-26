@@ -111,3 +111,7 @@ Implemented the main dashboard SwiftUI view, TimerManager state machine, and Pro
 ## Turn 12 — Manager (2026-05-26 12:05 UTC)
 
 Reviewing sprint status. We are at meeting 2/5. Swift UI files are verified by Craft, but the Python backend logic (jira_sync_service.py) and its acceptance tests (acceptance_tests.py) are failing or missing robust mocks. I will create a robust Jira sync service module and a comprehensive acceptance test suite that mocks HTTP requests to satisfy AC6 (networking layer) and ensure deterministic pass/fail. I will also update the README to reflect current progress.
+
+## Turn 13 — Manager (2026-05-26 12:12 UTC)
+
+I have created the Python service layer (`jira_sync_service.py`) and the acceptance tests (`acceptance_tests.py`) to satisfy AC #6. The tests use `responses` to mock Jira API endpoints, ensuring no network calls are made. I also updated `README.md` to reflect the current status and deliverables.

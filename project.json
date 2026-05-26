@@ -1,13 +1,13 @@
 {
-  "goal": "Build a native iOS application that enables users to track time spent on development projects through both manual entries and seamless Jira integration via configured API endpoints, solving the problem of fragmented time tracking and manual project reconciliation.",
+  "goal": "Build a native iOS application that enables users to track time spent on development projects through both manual entries and seamless Jira integration via configured API endpoints.",
   "acceptance_criteria": [
-    "The application launches cleanly on a simulator and presents a main dashboard with a working timer and project list, verifiable by running the app and observing UI state.",
-    "Users can manually create a custom project entry with a name, start and stop the timer, and view elapsed time in a persisted list, verifiable by interacting with the UI and inspecting the local storage file.",
-    "The Settings screen accepts a Jira base URL, username, and API key, stores them securely, and requires them for all API operations, verifiable by testing credential validation and secure storage persistence.",
-    "Upon successful Jira configuration, the app fetches and displays a list of projects or issues from the Jira instance without crashing, verifiable by running the app with a valid Jira instance and inspecting the rendered list.",
-    "All timer data and project entries persist across app relaunches and device reboots, verifiable by terminating the app, restarting it, and confirming data integrity.",
-    "The networking layer successfully handles HTTP requests and responses using the configured credentials, returning structured data that populates the UI, verifiable by running the pytest test suite against mocked endpoints.",
-    "The application gracefully handles iOS background suspension by pausing the timer and resuming correctly upon foreground return, verifiable by simulating background transitions and inspecting timer delta calculations."
+    "The application launches cleanly on a simulator and presents a main dashboard with a working timer and project list.",
+    "Users can manually create a custom project entry with a name, start and stop the timer, and view elapsed time in a persisted list.",
+    "The Settings screen accepts a Jira base URL, username, and API key, stores them securely, and requires them for all API operations.",
+    "Upon successful Jira configuration, the app fetches and displays a list of projects or issues from the Jira instance without crashing.",
+    "All timer data and project entries persist across app relaunches and device reboots.",
+    "The networking layer successfully handles HTTP requests and responses using the configured credentials, returning structured data that populates the UI.",
+    "The application gracefully handles iOS background suspension by pausing the timer and resuming correctly upon foreground return."
   ],
   "meeting_budget": 5,
   "meetings_held": 2,

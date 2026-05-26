@@ -1,39 +1,32 @@
 import requests
-import os
+
 
 class JiraService:
-    def __init__(self, base_url: str, username: str, api_key: str):
+    def __init__(self, base_url, username, api_key):
         self.base_url = base_url.rstrip('/')
         self.username = username
         self.api_key = api_key
+        self.session = requests.Session()
+        self.session.auth = (username, api_key)
+        self.session.headers.update({'Content-Type': 'application/json'})
 
-    def get_headers(self):
-        return {
-            'Authorization': f'Bearer {self.api_key}',
-            'Content-Type': 'application/json'
+    def get_projects(self):
+        url = f"{self.base_url}/rest/api/2/project"
+        response = self.session.get(url)
+        response.raise_for_status()
+        return response.json()
+
+    def get_issues(self, project_key):
+        url = f"{self.base_url}/rest/api/2/search"
+        payload = {
+            "jql": f"project={project_key}",
+            "fields": ["summary", "status", "assignee", "issueKey"]
         }
+        response = self.session.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
 
-    def fetch_projects(self):
-        url = f'{self.base_url}/rest/api/2/project'
-        try:
-            response = requests.get(url, headers=self.get_headers())
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.HTTPError as e:
-            raise Exception(f'HTTP Error: {e}')
-        except Exception as e:
-            raise Exception(f'Network Error: {e}')
-
-    def fetch_issues(self, project_key: str):
-        url = f'{self.base_url}/rest/api/2/search'
-        params = {
-            'jql': f'project={project_key}'
-        }
-        try:
-            response = requests.get(url, headers=self.get_headers(), params=params)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.HTTPError as e:
-            raise Exception(f'HTTP Error: {e}')
-        except Exception as e:
-            raise Exception(f'Network Error: {e}')
+    def validate_credentials(self):
+        url = f"{self.base_url}/rest/api/2/myself"
+        response = self.session.get(url)
+        return response.status_code == 200
