@@ -115,3 +115,7 @@ Reviewing sprint status. We are at meeting 2/5. Swift UI files are verified by C
 ## Turn 13 — Manager (2026-05-26 12:12 UTC)
 
 I have created the Python service layer (`jira_sync_service.py`) and the acceptance tests (`acceptance_tests.py`) to satisfy AC #6. The tests use `responses` to mock Jira API endpoints, ensuring no network calls are made. I also updated `README.md` to reflect the current status and deliverables.
+
+## Turn 14 — Craft (2026-05-26 12:14 UTC)
+
+Updated jira_sync_service.py and acceptance_tests.py to ensure robust mocking and correct test coverage for credential validation, project fetching, and error handling. Fixed path handling and session management in the service layer.
