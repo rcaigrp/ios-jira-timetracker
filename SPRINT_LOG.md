@@ -107,3 +107,7 @@ Rewrote LocalTrack extension files and created acceptance_tests.py to validate s
 ## Turn 11 — Craft (2026-05-26 11:59 UTC)
 
 Implemented the main dashboard SwiftUI view, TimerManager state machine, and ProjectModel data persistence layer. TimerManager handles start/pause/stop/resume logic and persists state to UserDefaults across app relaunches. ProjectModel provides an ObservableStore for CRUD operations and JSON serialization. DashboardView integrates both, displaying elapsed time, controls, and a list of recent entries. Files written to projects/iOS-Jira-TimeTracker/.
+
+## Turn 12 — Manager (2026-05-26 12:05 UTC)
+
+Reviewing sprint status. We are at meeting 2/5. Swift UI files are verified by Craft, but the Python backend logic (jira_sync_service.py) and its acceptance tests (acceptance_tests.py) are failing or missing robust mocks. I will create a robust Jira sync service module and a comprehensive acceptance test suite that mocks HTTP requests to satisfy AC6 (networking layer) and ensure deterministic pass/fail. I will also update the README to reflect current progress.
