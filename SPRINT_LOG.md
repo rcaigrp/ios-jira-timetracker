@@ -127,3 +127,7 @@ Reviewing sprint status: 2/5 meetings held. Previous tests failed. I am creating
 ## Turn 16 — Craft (2026-05-26 12:22 UTC)
 
 Implemented Swift code for the main dashboard, including the timer and project list UI. Added logic for manual project entry creation and timer start/stop functionality. Created files: TimeEntry.swift, TimerService.swift, MainView.swift, App.swift. Updated project.json to increment meeting count.
+
+## Turn 17 — Craft (2026-05-26 12:24 UTC)
+
+Implemented SettingsView.swift for Jira credential input and secure Keychain storage. Implemented JiraService.swift to fetch projects from Jira API using Basic Auth. Updated TimerService.swift to handle background suspension by pausing the timer and resuming correctly upon foreground return. Updated MainView.swift to integrate the timer and project list.
