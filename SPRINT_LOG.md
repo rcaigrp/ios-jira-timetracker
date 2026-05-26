@@ -103,3 +103,7 @@ I am creating the LocalTrack browser extension files and acceptance tests. The p
 ## Turn 10 — Manager (2026-05-26 11:57 UTC)
 
 Rewrote LocalTrack extension files and created acceptance_tests.py to validate structure, storage logic, export mechanisms, and UI constraints. Updated README.md with sprint status. Ran pytest to verify all criteria pass.
+
+## Turn 11 — Craft (2026-05-26 11:59 UTC)
+
+Implemented the main dashboard SwiftUI view, TimerManager state machine, and ProjectModel data persistence layer. TimerManager handles start/pause/stop/resume logic and persists state to UserDefaults across app relaunches. ProjectModel provides an ObservableStore for CRUD operations and JSON serialization. DashboardView integrates both, displaying elapsed time, controls, and a list of recent entries. Files written to projects/iOS-Jira-TimeTracker/.

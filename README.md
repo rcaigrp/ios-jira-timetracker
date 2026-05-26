@@ -13,10 +13,10 @@ Build a native iOS application that enables users to track time spent on develop
 7. Background suspension handling.
 
 ## Structure
-- `timer_manager.py`: Python module for timer state management and persistence.
-- `jira_sync_service.py`: Python module for Jira API communication.
-- `acceptance_tests.py`: Pytest tests for networking and data layers.
-- Swift files: UI and logic implementation.
+- `TimerManager.swift`: Manages timer lifecycle, state persistence, and resume logic.
+- `ProjectModel.swift`: Defines Project model and ProjectStore for CRUD/JSON persistence.
+- `DashboardView.swift`: Main SwiftUI view integrating timer, controls, and project list.
+- `acceptance_tests.py`: Pytest suite for networking and data validation.
 
 ## Status
-Active. Meeting 2 completed. All acceptance criteria tests passed.
+Active. Meeting 2 completed. Dashboard UI and core logic implemented.
