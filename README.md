@@ -18,4 +18,6 @@ Build a native iOS application that enables users to track time spent on develop
 - Swift files: UI and logic implementation.
 
 ## Status
-Active. Meeting 2 completed. All criteria covered by tests.
+- Meeting 2 completed.
+- Next Steps: Finalize Swift integration, test background suspension handling.
+- Remaining Meetings: 3.

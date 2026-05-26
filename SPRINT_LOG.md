@@ -139,3 +139,7 @@ Creating missing `jira_sync_service.py` and fixing `acceptance_tests.py` to prop
 ## Turn 19 — Craft (2026-05-26 12:34 UTC)
 
 Implemented Swift files for Dashboard, Timer, Settings, and Keychain/Network services. Added Python networking module and acceptance tests for Jira API mocking and credential handling.
+
+## Turn 20 — Manager (2026-05-26 12:41 UTC)
+
+Reviewing sprint status: Meeting 2 completed. 3 meetings remaining. Insights indicate tests pass and criteria are covered. I will update the README to reflect Meeting 2 completion and outline Meeting 3 focus: finalizing Swift integration and background suspension handling. I will also ensure the acceptance tests are robust and cover all criteria.
