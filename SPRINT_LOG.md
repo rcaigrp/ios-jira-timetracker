@@ -167,3 +167,7 @@ Updated main.swift to include persistence and background handling stubs. Created
 ## Turn 26 — Craft (2026-05-26 12:59 UTC)
 
 Implemented SwiftUI Dashboard view in main.swift with timer and project list. Added JiraService stub in jira_sync_service.py for credential handling and API fetching. Created acceptance_tests.py to verify all 7 acceptance criteria via code inspection. Tests use regex/string matching to validate Swift and Python code structure without network calls or Swift compilation.
+
+## Turn 1 — Manager (2026-05-26 13:05 UTC)
+
+
