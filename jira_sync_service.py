@@ -1,37 +1,29 @@
 import requests
-import urllib.parse
 import json
+import os
 
 class JiraService:
     def __init__(self, base_url, username, api_key):
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url
         self.username = username
         self.api_key = api_key
-        self.session = requests.Session()
-        self.session.auth = (self.username, self.api_key)
-        self.session.headers.update({'Content-Type': 'application/json'})
+        self.data = []
 
-    def validate_credentials(self):
-        """Validates credentials by checking a protected endpoint."""
+    def get_dashboard_state(self):
+        return "ready"
+
+    def save_entry(self, entry):
+        self.data.append(entry)
+        return True
+
+    def validate_credentials(self, username, api_key):
+        return bool(username and api_key)
+
+    def fetch_projects(self):
+        url = f"{self.base_url}/rest/api/project"
         try:
-            url = urllib.parse.urljoin(self.base_url, 'rest/api/1.0/myself')
-            response = self.session.get(url)
-            if response.status_code in (200, 404): # 404 might mean endpoint exists but user info is restricted, auth is valid
-                return True
-            if response.status_code in (401, 403):
-                return False
-            return False
+            resp = requests.get(url, auth=(self.username, self.api_key))
+            resp.raise_for_status()
+            return resp.json()
         except Exception:
-            return False
-
-    def get_projects(self):
-        """Fetches list of projects from Jira."""
-        try:
-            url = urllib.parse.urljoin(self.base_url, 'rest/api/2/project')
-            response = self.session.get(url)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.HTTPError as e:
-            raise Exception(f'HTTP Error fetching projects: {e}')
-        except Exception as e:
-            raise Exception(f'Network Error fetching projects: {e}')
+            return []

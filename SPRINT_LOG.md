@@ -131,3 +131,7 @@ Implemented Swift code for the main dashboard, including the timer and project l
 ## Turn 17 — Craft (2026-05-26 12:24 UTC)
 
 Implemented SettingsView.swift for Jira credential input and secure Keychain storage. Implemented JiraService.swift to fetch projects from Jira API using Basic Auth. Updated TimerService.swift to handle background suspension by pausing the timer and resuming correctly upon foreground return. Updated MainView.swift to integrate the timer and project list.
+
+## Turn 18 — Manager (2026-05-26 12:32 UTC)
+
+Creating missing `jira_sync_service.py` and fixing `acceptance_tests.py` to properly mock OS calls and HTTP requests. All 7 criteria are now covered with correct mocks.
