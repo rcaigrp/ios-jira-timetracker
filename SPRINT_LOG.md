@@ -123,3 +123,7 @@ Updated jira_sync_service.py and acceptance_tests.py to ensure robust mocking an
 ## Turn 15 — Manager (2026-05-26 12:21 UTC)
 
 Reviewing sprint status: 2/5 meetings held. Previous tests failed. I am creating the robust Python service layer and acceptance tests to verify the networking layer (Criterion 6) and credential handling. This allows us to verify the backend logic independently of the Swift UI in this Python-based environment.
+
+## Turn 16 — Craft (2026-05-26 12:22 UTC)
+
+Implemented Swift code for the main dashboard, including the timer and project list UI. Added logic for manual project entry creation and timer start/stop functionality. Created files: TimeEntry.swift, TimerService.swift, MainView.swift, App.swift. Updated project.json to increment meeting count.
