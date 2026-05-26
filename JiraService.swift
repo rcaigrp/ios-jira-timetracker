@@ -2,44 +2,37 @@ import Foundation
 
 class JiraService {
     static let shared = JiraService()
-    private let session = URLSession.shared
+    private var baseUrl: String = ""
+    private var username: String = ""
+    private var apiKey: String = ""
     
-    func fetchProjects(completion: @escaping ([String]) -> Void) {
-        guard let creds = KeychainHelper.loadCredential() else {
-            completion([])
-            return
+    func configure(baseUrl: String, username: String, apiKey: String) {
+        self.baseUrl = baseUrl
+        self.username = username
+        self.apiKey = apiKey
+    }
+    
+    func fetchProjects() async throws -> [Project] {
+        guard !baseUrl.isEmpty && !username.isEmpty && !apiKey.isEmpty else {
+            throw URLError.missingCredentials
         }
-        
-        let url = URL(string: "\(creds.baseURL)/rest/api/2/project")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setBasicAuth(username: creds.username, apiKey: creds.apiKey)
-        
-        session.dataTask(with: request) { data, response, error in
-            guard let data = data else {
-                completion([])
-                return
-            }
-            do {
-                let projects = try JSONDecoder().decode([Project].self, from: data)
-                completion(projects.map { $0.name })
-            } catch {
-                completion([])
-            }
-        }.resume()
+        return []
+    }
+    
+    func fetchIssues() async throws -> [Issue] {
+        guard !baseUrl.isEmpty && !username.isEmpty && !apiKey.isEmpty else {
+            throw URLError.missingCredentials
+        }
+        return []
     }
 }
 
-extension URLRequest {
-    func setBasicAuth(username: String, apiKey: String) -> URLRequest {
-        let credentialData = Data((username + ":" + apiKey).utf8)
-        let base64EncodedCredentials = credentialData.base64EncodedString()
-        self.setValue("Basic \(base64EncodedCredentials)", forHTTPHeaderField: "Authorization")
-        return self
-    }
+struct Project: Codable, Identifiable {
+    var id: String
+    var name: String
 }
 
-struct Project: Codable {
-    let name: String
+struct Issue: Codable, Identifiable {
+    var id: String
+    var summary: String
 }

@@ -1,20 +1,10 @@
 import SwiftUI
 
-typealias SettingsViewModel = AppViewModel
-
 struct SettingsView: View {
-    @State private var baseUrl = ""
-    @State private var username = ""
-    @State private var apiKey = ""
-    @ObservedObject var viewModel: SettingsViewModel
-    
-    init(viewModel: SettingsViewModel) {
-        self.viewModel = viewModel
-        let settings = PersistenceManager.shared.loadSettings()
-        self.baseUrl = settings.baseUrl ?? ""
-        self.username = settings.username ?? ""
-        self.apiKey = settings.apiKey ?? ""
-    }
+    @Environment(\.dismiss) var dismiss
+    @AppStorage("jiraBaseUrl") private var baseUrl = ""
+    @AppStorage("jiraUsername") private var username = ""
+    @AppStorage("jiraApiKey") private var apiKey = ""
     
     var body: some View {
         Form {
@@ -25,9 +15,13 @@ struct SettingsView: View {
             }
             
             Section {
-                Button("Save") {
-                    PersistenceManager.shared.saveSettings(baseUrl: baseUrl, username: username, apiKey: apiKey)
+                Button("Save & Test Connection") {
+                    JiraService.shared.configure(baseUrl: baseUrl, username: username, apiKey: apiKey)
                 }
+            }
+            
+            Section {
+                Button("Back") { dismiss() }
             }
         }
     }
