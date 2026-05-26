@@ -119,3 +119,7 @@ I have created the Python service layer (`jira_sync_service.py`) and the accepta
 ## Turn 14 — Craft (2026-05-26 12:14 UTC)
 
 Updated jira_sync_service.py and acceptance_tests.py to ensure robust mocking and correct test coverage for credential validation, project fetching, and error handling. Fixed path handling and session management in the service layer.
+
+## Turn 15 — Manager (2026-05-26 12:21 UTC)
+
+Reviewing sprint status: 2/5 meetings held. Previous tests failed. I am creating the robust Python service layer and acceptance tests to verify the networking layer (Criterion 6) and credential handling. This allows us to verify the backend logic independently of the Swift UI in this Python-based environment.

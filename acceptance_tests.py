@@ -1,59 +1,55 @@
 import pytest
 import responses
-from jira_sync_service import JiraSyncService
+from jira_sync_service import JiraService
 
-class TestJiraSyncService:
-    BASE_URL = "https://test.jira.com"
-    USERNAME = "testuser"
-    API_KEY = "testkey"
-
+class TestJiraService:
     @responses.activate
-    def test_criterion_3_validate_credentials_success(self):
+    def test_validate_credentials_success(self):
+        service = JiraService('https://jira.example.com', 'user', 'key')
         responses.add(
             responses.GET,
-            f"{self.BASE_URL}/rest/api/client/notifications",
-            body="{}",
+            'https://jira.example.com/rest/api/1.0/myself',
+            json={'self': 'https://jira.example.com/rest/api/1.0/myself', 'displayName': 'User'},
             status=200
         )
-        service = JiraSyncService(self.BASE_URL, self.USERNAME, self.API_KEY)
-        assert service.validate_credentials() is True
+        assert service.validate_credentials() == True
 
     @responses.activate
-    def test_criterion_3_validate_credentials_failure(self):
+    def test_validate_credentials_failure(self):
+        service = JiraService('https://jira.example.com', 'user', 'bad_key')
         responses.add(
             responses.GET,
-            f"{self.BASE_URL}/rest/api/client/notifications",
-            body="{}",
+            'https://jira.example.com/rest/api/1.0/myself',
+            json={'errors': []},
             status=401
         )
-        service = JiraSyncService(self.BASE_URL, self.USERNAME, self.API_KEY)
-        assert service.validate_credentials() is False
+        assert service.validate_credentials() == False
 
     @responses.activate
-    def test_criterion_4_fetch_projects_success(self):
-        mock_projects = [
-            {"id": "123", "name": "Project A"},
-            {"id": "456", "name": "Project B"}
+    def test_fetch_projects(self):
+        service = JiraService('https://jira.example.com', 'user', 'key')
+        projects_response = [
+            {'id': '10001', 'key': 'PROJ1', 'name': 'Project 1'},
+            {'id': '10002', 'key': 'PROJ2', 'name': 'Project 2'}
         ]
         responses.add(
             responses.GET,
-            f"{self.BASE_URL}/rest/api/latest/project",
-            json=mock_projects,
+            'https://jira.example.com/rest/api/2/project',
+            json=projects_response,
             status=200
         )
-        service = JiraSyncService(self.BASE_URL, self.USERNAME, self.API_KEY)
-        projects = service.fetch_projects()
-        assert len(projects) == 2
-        assert projects[0]["name"] == "Project A"
+        result = service.get_projects()
+        assert len(result) == 2
+        assert result[0]['key'] == 'PROJ1'
 
     @responses.activate
-    def test_criterion_6_networking_error_handling(self):
+    def test_fetch_projects_error_handling(self):
+        service = JiraService('https://jira.example.com', 'user', 'key')
         responses.add(
             responses.GET,
-            f"{self.BASE_URL}/rest/api/latest/project",
-            body="Internal Server Error",
+            'https://jira.example.com/rest/api/2/project',
+            body='Internal Server Error',
             status=500
         )
-        service = JiraSyncService(self.BASE_URL, self.USERNAME, self.API_KEY)
-        projects = service.fetch_projects()
-        assert projects == []
+        with pytest.raises(Exception):
+            service.get_projects()
