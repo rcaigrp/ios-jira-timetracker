@@ -15,10 +15,8 @@ Build a native iOS application that enables users to track time spent on develop
 ## Structure
 - `jira_sync_service.py`: Python module for Jira API communication.
 - `acceptance_tests.py`: Pytest tests for networking and data layers.
-- Swift files: UI and logic implementation.
+- `timer_manager.py`: Core logic for timer state management and persistence.
+- Swift files: UI and logic implementation (placeholders).
 
 ## Status
-Active. Meeting 3/5 completed.
-- jira_sync_service.py implemented.
-- acceptance_tests.py created and passing.
-- Swift files validated.
+Active. Meeting 2 completed. All Python deliverables created. Tests prepared.

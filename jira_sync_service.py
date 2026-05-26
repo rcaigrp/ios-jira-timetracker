@@ -6,9 +6,8 @@ class JiraSyncService:
         self.username = username
         self.api_key = api_key
 
-    def get_projects(self):
+    def fetch_projects(self):
         url = f"{self.base_url}/rest/api/2/project"
-        auth = (self.username, self.api_key)
-        response = requests.get(url, auth=auth)
+        response = requests.get(url, auth=(self.username, self.api_key))
         response.raise_for_status()
         return response.json()
