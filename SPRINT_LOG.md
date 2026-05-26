@@ -59,3 +59,7 @@ I will:
   }
 }
 ```
+
+## Turn 3 — Craft (2026-05-26 11:00 UTC)
+
+Created validate_swift.py to fix the Python validation script syntax, checking DashboardView.swift and DashboardViewModel.swift for structural correctness (balanced braces/parentheses, Swift syntax). Ran the validator and executed pytest acceptance_tests.py to verify all acceptance criteria pass.
