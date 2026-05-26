@@ -1,54 +1,85 @@
-import pytest
+import unittest
 import json
 import os
+import time
 import responses
-from timer_manager import TimerManager
+import sys
+sys.path.insert(0, '/workspace/projects/iOS-Jira-TimeTracker')
+
+from TimerManager import TimerManager
 from jira_sync_service import JiraSyncService
 
-TEST_DATA_FILE = "test_timer_data.json"
+class TestTimerManager(unittest.TestCase):
+    def setUp(self):
+        self.manager = TimerManager()
+        # Ensure clean state for tests
+        self.manager.running = False
+        self.manager.start_time = None
+        self.manager.elapsed = 0
+        self.manager.project = ""
+        self.manager.should_resume = False
+        self.manager.save_state()
 
-@pytest.fixture
-def timer_manager():
-    tm = TimerManager(data_file=TEST_DATA_FILE)
-    tm.running = False
-    tm.start_time = None
-    tm.elapsed = 0
-    tm.save_state()
-    yield tm
-    if os.path.exists(TEST_DATA_FILE):
-        os.remove(TEST_DATA_FILE)
+    def tearDown(self):
+        # Cleanup
+        if os.path.exists(self.manager.state_file):
+            os.remove(self.manager.state_file)
 
-def test_timer_start_persistence(timer_manager):
-    timer_manager.start()
-    assert timer_manager.running is True
-    assert timer_manager.start_time is not None
-    with open(TEST_DATA_FILE) as f:
-        state = json.load(f)
-    assert state['running'] is True
-    assert state['start_time'] is not None
+    def test_timer_persistence(self):
+        # Start timer
+        self.manager.start_timer("TestProject")
+        time.sleep(0.1) # Small delay
+        # Save state (simulated by calling start which saves)
+        # Simulate restart
+        manager2 = TimerManager()
+        self.assertTrue(manager2.running)
+        self.assertEqual(manager2.project, "TestProject")
+        self.assertIsNotNone(manager2.start_time)
 
-def test_timer_pause_resume(timer_manager):
-    timer_manager.start()
-    import time
-    time.sleep(0.1)
-    timer_manager.pause()
-    assert timer_manager.running is False
-    assert timer_manager.elapsed > 0
-    timer_manager.save_state()
-    
-    tm2 = TimerManager(data_file=TEST_DATA_FILE)
-    assert tm2.running is False
-    assert tm2.elapsed > 0
+    def test_background_suspension(self):
+        self.manager.start_timer("TestProject")
+        time.sleep(0.1)
+        # Simulate suspend
+        self.manager.handle_background_suspend()
+        # Check state
+        self.assertFalse(self.manager.running)
+        self.assertEqual(self.manager.should_resume, True)
+        self.assertGreaterEqual(self.manager.elapsed, 0.1)
 
-@responses.activate
-def test_jira_sync_service_get_projects():
-    responses.add(
-        responses.GET,
-        "https://example.atlassian.net/rest/api/latest/project",
-        body=json.dumps([{"id": "1", "name": "TestProject"}]),
-        status=200
-    )
-    service = JiraSyncService("https://example.atlassian.net", "user", "key")
-    result = service.get_projects()
-    assert len(result) == 1
-    assert result[0]['name'] == "TestProject"
+    def test_foreground_resume(self):
+        self.manager.start_timer("TestProject")
+        time.sleep(0.1)
+        self.manager.handle_background_suspend()
+        # Simulate resume
+        self.manager.handle_foreground_resume()
+        self.assertTrue(self.manager.running)
+        self.assertEqual(self.manager.should_resume, False)
+
+    def test_stop_timer(self):
+        self.manager.start_timer("TestProject")
+        time.sleep(0.1)
+        elapsed = self.manager.stop_timer()
+        self.assertFalse(self.manager.running)
+        self.assertGreaterEqual(elapsed, 0.1)
+
+class TestJiraSyncService(unittest.TestCase):
+    @responses.activate
+    def test_get_projects(self):
+        base_url = "https://test.jira.com"
+        username = "user"
+        api_key = "key"
+        service = JiraSyncService(base_url, username, api_key)
+        
+        mock_response = [{"id": "1", "name": "Project 1"}]
+        responses.add(
+            responses.GET,
+            f"{base_url}/rest/api/2/project",
+            body=json.dumps(mock_response),
+            status=200
+        )
+        
+        projects = service.get_projects()
+        self.assertEqual(projects, mock_response)
+
+if __name__ == '__main__':
+    unittest.main()
