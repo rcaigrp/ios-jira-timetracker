@@ -1,63 +1,63 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @StateObject var timerManager = TimerManager()
-    @StateObject var projectStore = ProjectStore()
-    @State private var projectTitle: String = ""
-    @State private var projectNotes: String = ""
+    @StateObject var timerService = TimerService()
+    @StateObject var jiraService = JiraService()
+    @State var projectList: [String] = []
     
     var body: some View {
-        NavigationStack {
-            List {
-                Section(header: Text("Active Timer")) {
-                    HStack {
-                        Text(timerManager.elapsedSeconds.formattedDuration)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        Spacer()
-                        Button(timerManager.isRunning ? "Pause" : "Start") {
-                            if timerManager.isRunning {
-                                timerManager.pauseTimer()
-                            } else {
-                                timerManager.startTimer()
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .foregroundColor(timerManager.isRunning ? .orange : .green)
-                    }
-                    .onAppear {
-                        if UserDefaults.standard.object(forKey: "timer_start_time") != nil {
-                            timerManager.resumeTimer()
+        ScrollView {
+            VStack {
+                TimerView(timerService: timerService)
+                
+                Divider()
+                
+                HStack {
+                    Text("Projects")
+                    Spacer()
+                    Button("Sync") {
+                        jiraService.fetchProjects { projects in
+                            projectList = projects
                         }
                     }
                 }
                 
-                Section(header: Text("Recent Entries")) {
-                    ForEach(projectStore.projects) { project in
-                        VStack(alignment: .leading) {
-                            Text(project.name)
-                            Text(project.formattedDuration)
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("LocalTrack")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save Entry") {
-                        if let start = timerManager.startTime, timerManager.isRunning == false {
-                            let newProject = Project(name: projectTitle, startTime: start, endTime: Date(), duration: timerManager.elapsedSeconds, notes: projectNotes)
-                            projectStore.addProject(newProject)
-                            timerManager.stopTimer()
-                            projectTitle = ""
-                            projectNotes = ""
-                        }
-                    }
-                    .disabled(timerManager.elapsedSeconds == 0)
+                List(projectList, id: \.self) { project in
+                    Text(project)
                 }
             }
         }
+        .onAppear {
+            if let creds = KeychainHelper.loadCredential() {
+                // Auto sync if configured
+                jiraService.fetchProjects { projects in
+                    projectList = projects
+                }
+            }
+        }
+    }
+}
+
+struct TimerView: View {
+    @ObservedObject var timerService: TimerService
+    
+    var body: some View {
+        HStack {
+            Text(formatTime(timerService.elapsed))
+                .font(.largeTitle)
+            Spacer()
+            if timerService.isRunning {
+                Button("Pause") { timerService.pause() }
+            } else {
+                Button("Start") { timerService.start() }
+            }
+            Button("Stop") { timerService.stop() }
+        }
+    }
+    
+    private func formatTime(_ seconds: TimeInterval) -> String {
+        let minutes = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%d:%02d", minutes, secs)
     }
 }

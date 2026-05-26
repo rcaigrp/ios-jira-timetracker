@@ -135,3 +135,7 @@ Implemented SettingsView.swift for Jira credential input and secure Keychain sto
 ## Turn 18 — Manager (2026-05-26 12:32 UTC)
 
 Creating missing `jira_sync_service.py` and fixing `acceptance_tests.py` to properly mock OS calls and HTTP requests. All 7 criteria are now covered with correct mocks.
+
+## Turn 19 — Craft (2026-05-26 12:34 UTC)
+
+Implemented Swift files for Dashboard, Timer, Settings, and Keychain/Network services. Added Python networking module and acceptance tests for Jira API mocking and credential handling.
