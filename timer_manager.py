@@ -2,78 +2,83 @@ import json
 import os
 import time
 
+DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'timer.json')
+
 class TimerManager:
-    def __init__(self, state_file="timer_data.json"):
-        self.state_file = state_file
-        self.running = False
-        self.start_time = None
-        self.elapsed = 0
-        self.should_resume = False
-        self.project_name = None
-        self.load_state()
+    def __init__(self):
+        self.load_data()
 
-    def load_state(self):
-        if os.path.exists(self.state_file):
-            with open(self.state_file, 'r') as f:
-                data = json.load(f)
-                self.running = data.get('running', False)
-                self.start_time = data.get('start_time')
-                self.elapsed = data.get('elapsed', 0)
-                self.should_resume = data.get('should_resume', False)
-                self.project_name = data.get('project_name')
+    def load_data(self):
+        if not os.path.exists(DATA_FILE):
+            self.data = {
+                'entries': [],
+                'current_timer': None,
+                'should_resume': False
+            }
         else:
-            self.running = False
-            self.start_time = None
-            self.elapsed = 0
-            self.should_resume = False
-            self.project_name = None
+            with open(DATA_FILE, 'r') as f:
+                self.data = json.load(f)
 
-    def save_state(self):
-        with open(self.state_file, 'w') as f:
-            json.dump({
-                'running': self.running,
-                'start_time': self.start_time,
-                'elapsed': self.elapsed,
-                'should_resume': self.should_resume,
-                'project_name': self.project_name
-            }, f)
+    def save_data(self):
+        os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+        with open(DATA_FILE, 'w') as f:
+            json.dump(self.data, f)
 
-    def start(self, project_name):
-        self.running = True
-        self.start_time = time.time()
-        self.elapsed = 0
-        self.should_resume = False
-        self.project_name = project_name
-        self.save_state()
-        return {'status': 'running', 'project': project_name}
+    def start_timer(self, project_name):
+        self.data['current_timer'] = {
+            'project': project_name,
+            'start_time': time.time(),
+            'duration': 0,
+            'notes': ''
+        }
+        self.data['should_resume'] = False
+        self.save_data()
 
-    def pause(self):
-        if self.running:
-            current_time = time.time()
-            self.elapsed += current_time - self.start_time
-            self.running = False
-            self.start_time = None
-            self.should_resume = True
-            self.save_state()
-            return {'status': 'paused', 'elapsed': self.elapsed}
+    def pause_timer(self):
+        if self.data['current_timer']:
+            self.data['current_timer']['duration'] = time.time() - self.data['current_timer']['start_time']
+            self.data['current_timer']['start_time'] = None
+            self.data['should_resume'] = True
+            self.save_data()
+
+    def stop_timer(self):
+        if self.data['current_timer']:
+            if self.data['current_timer']['start_time']:
+                self.data['current_timer']['duration'] = time.time() - self.data['current_timer']['start_time']
+            entry = {
+                'id': len(self.data['entries']) + 1,
+                'project': self.data['current_timer']['project'],
+                'date': time.strftime('%Y-%m-%d'),
+                'startTime': self.data['current_timer']['start_time'],
+                'endTime': time.time(),
+                'duration': self.data['current_timer']['duration'],
+                'notes': self.data['current_timer'].get('notes', '')
+            }
+            self.data['entries'].append(entry)
+            self.data['current_timer'] = None
+            self.data['should_resume'] = False
+            self.save_data()
+            return entry
+
+    def get_timer_status(self):
+        if self.data['current_timer']:
+            if self.data['current_timer']['start_time']:
+                current_duration = time.time() - self.data['current_timer']['start_time']
+                total_duration = self.data['current_timer']['duration'] + current_duration
+                return {
+                    'status': 'running',
+                    'project': self.data['current_timer']['project'],
+                    'duration': total_duration,
+                    'notes': self.data['current_timer'].get('notes', '')
+                }
+            else:
+                return {
+                    'status': 'paused',
+                    'project': self.data['current_timer']['project'],
+                    'duration': self.data['current_timer']['duration'],
+                    'notes': self.data['current_timer'].get('notes', '')
+                }
         return {'status': 'stopped'}
 
-    def resume(self):
-        if self.should_resume:
-            self.running = True
-            self.start_time = time.time()
-            self.should_resume = False
-            self.save_state()
-            return {'status': 'running'}
-        return {'status': 'stopped'}
-
-    def stop(self):
-        if self.running:
-            current_time = time.time()
-            self.elapsed += current_time - self.start_time
-            self.running = False
-            self.start_time = None
-            self.should_resume = False
-            self.save_state()
-            return {'status': 'stopped', 'elapsed': self.elapsed}
-        return {'status': 'stopped'}
+    def get_entries(self):
+        return self.data['entries']
